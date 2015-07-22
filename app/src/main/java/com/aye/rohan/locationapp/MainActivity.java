@@ -1,12 +1,15 @@
 package com.aye.rohan.locationapp;
 
+import android.content.Intent;
 import android.location.Location;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -18,9 +21,13 @@ import org.w3c.dom.Text;
 public class MainActivity extends ActionBarActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
+    public final static String LATITUDE_MSG_KEY = "latitude";
+    public final static String LONGITUDE_MSG_KEY = "longitude";
+
     GoogleApiClient mGoogleApiClient;
     private boolean mResolvingError = false;
     private static final String TAG = "MyActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,4 +106,38 @@ public class MainActivity extends ActionBarActivity implements
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.i(TAG,"Connection Failed");
     }
+
+    // Button Handlers
+    /** Called when the user clicks the Send button */
+    public void sendMessage(View view) {
+        // Do something in response to button
+        Intent intent = new Intent(this, CreateEventActivity.class);
+
+        //Extract lat and long values
+        EditText latitude = (EditText) findViewById(R.id.latValue);
+        EditText longitude = (EditText) findViewById(R.id.longValue);
+
+        //Pass Lat and Long values to next activity
+        intent.putExtra(LATITUDE_MSG_KEY, latitude.getText().toString());
+        intent.putExtra(LONGITUDE_MSG_KEY, longitude.getText().toString());
+
+        startActivity(intent);
+    }
+
+    public void searchEvents(View view){
+        // Do something in response to button
+        Intent intent = new Intent(this, ListEvent.class);
+
+        //Extract lat and long values
+        EditText latitude = (EditText) findViewById(R.id.latValue);
+        EditText longitude = (EditText) findViewById(R.id.longValue);
+
+        //Pass Lat and Long values to next activity
+        intent.putExtra(LATITUDE_MSG_KEY, latitude.getText().toString());
+        intent.putExtra(LONGITUDE_MSG_KEY, longitude.getText().toString());
+
+        startActivity(intent);
+
+    }
+
 }
