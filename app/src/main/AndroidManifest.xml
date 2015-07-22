@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aye.rohan.locationapp" >
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:allowBackup="true"
@@ -10,7 +12,8 @@
         android:theme="@style/AppTheme" >
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBaTCXGhCFt6LjvrGT6UmAs75cdM1piv9o"/>
+            android:value="AIzaSyBaTCXGhCFt6LjvrGT6UmAs75cdM1piv9o" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >
@@ -19,6 +22,18 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".CreateEventActivity"
+            android:label="@string/title_activity_create_event" >
+        </activity>
+        <activity
+            android:name=".TemporarySuccessActivity"
+            android:label="@string/title_activity_temporary_success" >
+        </activity>
+        <activity
+            android:name=".ListEvent"
+            android:label="@string/title_activity_list_event" >
         </activity>
     </application>
 
