@@ -2,6 +2,7 @@ package com.aye.rohan.locationapp;
 
 import android.content.Intent;
 import android.location.Location;
+import android.os.Debug;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,11 +12,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.view.View;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
 import org.w3c.dom.Text;
+import com.facebook.FacebookSdk;
 
 
 public class MainActivity extends ActionBarActivity implements
@@ -28,6 +35,10 @@ public class MainActivity extends ActionBarActivity implements
     private boolean mResolvingError = false;
     private static final String TAG = "MyActivity";
 
+    private LoginButton loginButton;
+    private TextView info;
+    private CallbackManager callbackManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,7 +47,34 @@ public class MainActivity extends ActionBarActivity implements
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        callbackManager = CallbackManager.Factory.create();
         setContentView(R.layout.activity_main);
+        loginButton = (LoginButton)findViewById(R.id.login_button);
+
+        loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                Log.e("aye","SUCCESS");
+                info.setText(
+                        "User ID: "
+                                + loginResult.getAccessToken().getUserId()
+                                + "\n" +
+                                "Auth Token: "
+                                + loginResult.getAccessToken().getToken()
+                );
+            }
+
+            @Override
+            public void onCancel() {
+                Log.e("aye","CANCEL");
+            }
+
+            @Override
+            public void onError(FacebookException e) {
+                Log.e("aye","Error");
+            }
+        });
     }
 
     @Override
@@ -95,6 +133,11 @@ public class MainActivity extends ActionBarActivity implements
 
         }
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

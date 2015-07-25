@@ -6,10 +6,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
 import android.widget.TextView;
-
-import com.aye.rohan.locationapp.R;
 
 public class TemporarySuccessActivity extends ActionBarActivity {
 
@@ -48,6 +45,7 @@ public class TemporarySuccessActivity extends ActionBarActivity {
                     startActivity(intent);
 
                     TemporarySuccessActivity.this.finish();
+                    
 
                     //overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
 
