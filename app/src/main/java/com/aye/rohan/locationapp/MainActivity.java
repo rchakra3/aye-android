@@ -40,6 +40,7 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
@@ -47,8 +48,15 @@ public class MainActivity extends ActionBarActivity implements
                 .build();
         TextView infoText = (TextView) findViewById(R.id.info);
         Bundle extras = getIntent().getExtras();
-        infoText.setText("Username: "+extras.getString("userID")+"\n"+"Token: "+extras.getString("accessToken"));
-        setContentView(R.layout.activity_main);
+        String userID = extras.getString("userID");
+        String accessToken = extras.getString("accessToken");
+        if(infoText!=null) {
+            Log.e("AYE-MainActivity","infoText is not null!");
+            infoText.setText("Username: " + userID + "\n" + "Token: " + accessToken);
+        }
+        else{
+            Log.e("AYE-MainActivity","infoText is nul :(");
+        }
     }
 
     @Override

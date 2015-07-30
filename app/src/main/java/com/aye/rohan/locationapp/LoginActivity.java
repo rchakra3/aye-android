@@ -51,11 +51,4 @@ public class LoginActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-    private void openMainActivity(String userID, String accessToken){
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("userID",userID);
-        intent.putExtra("accessToken",accessToken);
-        startActivity(intent);
-    }
 }

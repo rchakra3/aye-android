@@ -44,6 +44,7 @@ public class LoginActivityFragment extends Fragment {
             Log.e("AYEEEE","ERROR ERROR ERORRR");
 
         }
+        loginButton.setFragment(this);
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -72,5 +73,11 @@ public class LoginActivityFragment extends Fragment {
         intent.putExtra("accessToken",accessToken);
         Log.e("AYE","STARTING MAIN ACTIVITY");
         startActivity(intent);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 }
