@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">LocationApp</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_create_event">CreateEventActivity</string>
+    <string name="button_send">Go to Event Creation</string>
+    <string name="create_event">Create Event</string>
+    <string name="title_activity_temporary_success">TemporarySuccessActivity</string>
+    <string name="event_success">TemporarySuccessActivity</string>
+    <string name="title_activity_list_event">ListEvent</string>
+</resources>
