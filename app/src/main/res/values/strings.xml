@@ -9,4 +9,6 @@
     <string name="title_activity_temporary_success">TemporarySuccessActivity</string>
     <string name="event_success">TemporarySuccessActivity</string>
     <string name="title_activity_list_event">ListEvent</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="facebook_app_id">xxxxx</string>
 </resources>
