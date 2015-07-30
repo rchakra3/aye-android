@@ -35,9 +35,7 @@ public class MainActivity extends ActionBarActivity implements
     private boolean mResolvingError = false;
     private static final String TAG = "MyActivity";
 
-    private LoginButton loginButton;
-    private TextView info;
-    private CallbackManager callbackManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,34 +45,10 @@ public class MainActivity extends ActionBarActivity implements
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        callbackManager = CallbackManager.Factory.create();
+        TextView infoText = (TextView) findViewById(R.id.info);
+        Bundle extras = getIntent().getExtras();
+        infoText.setText("Username: "+extras.getString("userID")+"\n"+"Token: "+extras.getString("accessToken"));
         setContentView(R.layout.activity_main);
-        loginButton = (LoginButton)findViewById(R.id.login_button);
-
-        loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                Log.e("aye","SUCCESS");
-                info.setText(
-                        "User ID: "
-                                + loginResult.getAccessToken().getUserId()
-                                + "\n" +
-                                "Auth Token: "
-                                + loginResult.getAccessToken().getToken()
-                );
-            }
-
-            @Override
-            public void onCancel() {
-                Log.e("aye","CANCEL");
-            }
-
-            @Override
-            public void onError(FacebookException e) {
-                Log.e("aye","Error");
-            }
-        });
     }
 
     @Override
@@ -133,11 +107,6 @@ public class MainActivity extends ActionBarActivity implements
 
         }
 
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
