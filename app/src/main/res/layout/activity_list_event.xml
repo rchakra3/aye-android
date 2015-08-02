@@ -20,7 +20,7 @@
         android:id="@+id/list_label"
         android:textAlignment="center"/>
 
-    <ListView android:id="@android:id/list"
+    <ListView android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#dee7ef"

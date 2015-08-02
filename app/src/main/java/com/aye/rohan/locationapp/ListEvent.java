@@ -1,20 +1,16 @@
 package com.aye.rohan.locationapp;
 
-import android.app.ListActivity;
-import android.app.LoaderManager;
-import android.content.CursorLoader;
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-import android.content.Loader;
-import android.database.Cursor;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 
 import org.apache.http.HttpResponse;
@@ -23,29 +19,28 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-public class ListEvent extends ListActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ListEvent extends Activity {
 
     public static String API_SERVER = "http://45.55.27.229";
     public static String PORT = "9000";
     public static String FIND_EVENT_URI = "/find_event";
+    public static JSONArray results;
 
     // This is the Adapter being used to display the list's data
     SimpleCursorAdapter mAdapter;
-
-    // These are the Contacts rows that we will retrieve
-    static final String[] PROJECTION = new String[] {ContactsContract.Data._ID,
-            ContactsContract.Data.DISPLAY_NAME};
-
-    // This is the select criteria
-    static final String SELECTION = "((" +
-            ContactsContract.Data.DISPLAY_NAME + " NOTNULL) AND (" +
-            ContactsContract.Data.DISPLAY_NAME + " != '' ))";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,91 +50,133 @@ public class ListEvent extends ListActivity implements LoaderManager.LoaderCallb
         setContentView(R.layout.activity_list_event);
 
 
-        //retriving contents from past activity
+        //retreiving contents from past activity
         String latitude = intent.getStringExtra(MainActivity.LATITUDE_MSG_KEY);
         String longitude = intent.getStringExtra(MainActivity.LONGITUDE_MSG_KEY);
+        String find_distance = intent.getStringExtra(MainActivity.FIND_DISTANCE_KEY);
 
         // Connect to API here and find relevant events to populate List View
-        new HttpSender().execute("" + latitude, "" + longitude, ""+1000000000);
-
-        // Create a progress bar to display while the list loads
-        ProgressBar progressBar = new ProgressBar(this);
-        progressBar.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
-        progressBar.setIndeterminate(true);
-        getListView().setEmptyView(progressBar);
-
-        // Must add the progress bar to the root of the layout
-        ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
-        root.addView(progressBar);
+        try {
+            new HttpSender().execute("" + latitude, "" + longitude, "" + 1000000000).get();
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
         // For the cursor adapter, specify which columns go into which views
-        String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME};
+        final ArrayList<String> list = getRows(find_distance);
+        //String[] columns = new String[]{"aa", "bb"};
         int[] toViews = {android.R.id.text1}; // The TextView in simple_list_item_1
 
-        // Create an empty adapter we will use to display the loaded data.
-        // We pass null for the cursor, then update it in onLoadFinished()
-        mAdapter = new SimpleCursorAdapter(this,
-                android.R.layout.simple_list_item_1, null,
-                fromColumns, toViews, 0);
-        setListAdapter(mAdapter);
+        final ListView listview = (ListView) findViewById(R.id.list);
+        final StableArrayAdapter adapter = new StableArrayAdapter(this,
+                android.R.layout.simple_list_item_1, list);
+        listview.setAdapter(adapter);
 
-        // Prepare the loader.  Either re-connect with an existing one,
-        // or start a new one.
-        getLoaderManager().initLoader(0, null, this);
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+            @Override
+            public void onItemClick(AdapterView<?> parent, final View view,
+                                    int position, long id) {
+                final String item = (String) parent.getItemAtPosition(position);
+                view.animate().setDuration(2000).alpha(0)
+                        .withEndAction(new Runnable() {
+                            @Override
+                            public void run() {
+                                list.remove(item);
+                                adapter.notifyDataSetChanged();
+                                view.setAlpha(1);
+                            }
+                        });
+            }
+
+        });
+
     }
 
-    // Called when a new Loader needs to be created
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        // Now create and return a CursorLoader that will take care of
-        // creating a Cursor for the data being displayed.
-        return new CursorLoader(this, ContactsContract.Data.CONTENT_URI,
-                PROJECTION, SELECTION, null, null);
+    // Get rows data into ListView
+    public static ArrayList<String> getRows(String find_distance) {
+
+        Double find_within_meters = Double.parseDouble(find_distance);
+        ArrayList<String> rows_arr = new ArrayList<String>();
+        try
+        {
+
+            for(int i=0; i<results.length(); i++)
+            {
+                JSONArray record_arr = (JSONArray) results.get(i);
+                String title = (String) record_arr.get(0);
+                String desc = (String) record_arr.get(1);
+                //Double event_lon = (Double) record_arr.get(2);
+                //Double event_lat = (Double) record_arr.get(3);
+                Double event_distance = (Double) record_arr.get(4);
+
+                if(event_distance <= find_within_meters)
+                {
+                    rows_arr.add(""+title+"\nDescription:\n"+desc+
+                            "\nEvent is at a distance of : "+event_distance.toString()+
+                            " Meters");
+                }
+
+            }
+        }
+
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
+
+        return rows_arr;
     }
 
-    // Called when a previously created loader has finished loading
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        // Swap the new cursor in.  (The framework will take care of closing the
-        // old cursor once we return.)
-        mAdapter.swapCursor(data);
-    }
 
-    // Called when a previously created loader is reset, making the data unavailable
-    public void onLoaderReset(Loader<Cursor> loader) {
-        // This is called when the last Cursor provided to onLoadFinished()
-        // above is about to be closed.  We need to make sure we are no
-        // longer using it.
-        mAdapter.swapCursor(null);
-    }
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        // Do something when a list item is clicked
-    }
-
-    public void findEventsAPI(double latitude, double longitude, double distance)
+    //Connect to APi to fetch new Events
+    public JSONArray findEventsAPI(double latitude, double longitude, double distance)
     {
+        JSONArray data = null;
+
         try {
 
-            DefaultHttpClient httpClient = new DefaultHttpClient();
-            HttpPost postRequest = new HttpPost(API_SERVER+":"+PORT+FIND_EVENT_URI);
-            JSONObject jsonObj = new JSONObject();
-            jsonObj.put("latitude", latitude);
-            jsonObj.put("longitude", longitude);
-            jsonObj.put("distance", distance);
+                DefaultHttpClient httpClient = new DefaultHttpClient();
+                HttpPost postRequest = new HttpPost(API_SERVER+":"+PORT+FIND_EVENT_URI);
+                JSONObject jsonObj = new JSONObject();
+                jsonObj.put("latitude", latitude);
+                jsonObj.put("longitude", longitude);
+                jsonObj.put("distance", distance);
 
-            StringEntity input = new StringEntity(jsonObj.toString(), HTTP.UTF_8);
-            System.out.print(API_SERVER+":"+PORT+FIND_EVENT_URI);
-            System.out.print(jsonObj.toString());
+                StringEntity input = new StringEntity(jsonObj.toString(), HTTP.UTF_8);
+                System.out.print(API_SERVER+":"+PORT+FIND_EVENT_URI);
+                System.out.print(jsonObj.toString());
 
-            input.setContentType("application/json");
-            postRequest.setHeader("Accept", "application/json");
-            postRequest.setEntity(input);
+                input.setContentType("application/json");
+                postRequest.setHeader("Accept", "application/json");
+                postRequest.setEntity(input);
 
-            HttpClient client = new DefaultHttpClient();
-            HttpResponse response = client.execute(postRequest);
-            System.out.print(response.getStatusLine().getStatusCode());
-            httpClient.getConnectionManager().shutdown();
+                HttpClient client = new DefaultHttpClient();
+                HttpResponse response = client.execute(postRequest);
+
+                //Reading the content
+                BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+                String line = null;
+
+                StringBuffer sb = new StringBuffer();
+
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+
+                String results = sb.toString();
+                JSONObject jObject  = new JSONObject(results); // json
+                data = jObject.getJSONArray("results"); // get data object
+
+                System.out.print(data);
+                System.out.print(response.getStatusLine().getStatusCode());
+
+                httpClient.getConnectionManager().shutdown();
 
         } catch (MalformedURLException e) {
 
@@ -153,6 +190,8 @@ public class ListEvent extends ListActivity implements LoaderManager.LoaderCallb
             e.printStackTrace();
         }
 
+        return data;
+
 
     }
 
@@ -160,7 +199,7 @@ public class ListEvent extends ListActivity implements LoaderManager.LoaderCallb
         @Override
         protected Double doInBackground(String... params) {
             // TODO Auto-generated method stub
-            findEventsAPI(Double.parseDouble(params[0]),
+            results = findEventsAPI(Double.parseDouble(params[0]),
                     Double.parseDouble(params[1]), Double.parseDouble(params[2]));
             return null;
         }
@@ -171,4 +210,33 @@ public class ListEvent extends ListActivity implements LoaderManager.LoaderCallb
 
     }
 
+
+    private class StableArrayAdapter extends ArrayAdapter<String> {
+
+        HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();
+
+        public StableArrayAdapter(Context context, int textViewResourceId,
+                                  List<String> objects) {
+            super(context, textViewResourceId, objects);
+            for (int i = 0; i < objects.size(); ++i) {
+                mIdMap.put(objects.get(i), i);
+            }
+        }
+
+        @Override
+        public long getItemId(int position) {
+            String item = getItem(position);
+            return mIdMap.get(item);
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
+
+    }
+
+
 }
+
+

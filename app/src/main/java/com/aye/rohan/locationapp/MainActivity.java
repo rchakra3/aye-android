@@ -2,20 +2,18 @@ package com.aye.rohan.locationapp;
 
 import android.content.Intent;
 import android.location.Location;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-
-import org.w3c.dom.Text;
 
 
 public class MainActivity extends ActionBarActivity implements
@@ -23,6 +21,7 @@ public class MainActivity extends ActionBarActivity implements
 
     public final static String LATITUDE_MSG_KEY = "latitude";
     public final static String LONGITUDE_MSG_KEY = "longitude";
+    public final static String FIND_DISTANCE_KEY = "find_distance";
 
     GoogleApiClient mGoogleApiClient;
     private boolean mResolvingError = false;
@@ -125,16 +124,19 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     public void searchEvents(View view){
+
         // Do something in response to button
         Intent intent = new Intent(this, ListEvent.class);
 
         //Extract lat and long values
         EditText latitude = (EditText) findViewById(R.id.latValue);
         EditText longitude = (EditText) findViewById(R.id.longValue);
+        EditText find_distance = (EditText) findViewById(R.id.findDistanceValue);
 
         //Pass Lat and Long values to next activity
         intent.putExtra(LATITUDE_MSG_KEY, latitude.getText().toString());
         intent.putExtra(LONGITUDE_MSG_KEY, longitude.getText().toString());
+        intent.putExtra(FIND_DISTANCE_KEY, find_distance.getText().toString());
 
         startActivity(intent);
 
