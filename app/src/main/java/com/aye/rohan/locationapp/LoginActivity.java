@@ -6,22 +6,27 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
+import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
-import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
 
 
 public class LoginActivity extends ActionBarActivity {
+
+    private String accessToken = null;
+    private String userID = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
+
+        if(AccessToken.getCurrentAccessToken() != null) {
+            accessToken = AccessToken.getCurrentAccessToken().getToken();
+            userID = AccessToken.getCurrentAccessToken().getUserId();
+            openMainActivity(userID,accessToken);
+        }
+
         setContentView(R.layout.activity_login);
     }
 
@@ -50,5 +55,13 @@ public class LoginActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openMainActivity(String userID, String accessToken){
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("userID",userID);
+        intent.putExtra("accessToken",accessToken);
+        Log.e("AYE","STARTING MAIN ACTIVITY");
+        startActivity(intent);
     }
 }
