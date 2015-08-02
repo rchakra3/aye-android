@@ -6,21 +6,34 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.provider.ContactsContract;
-import android.support.v7.app.ActionBarActivity;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HTTP;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+
 public class ListEvent extends ListActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    public static String API_SERVER = "http://45.55.27.229";
+    public static String PORT = "9000";
+    public static String FIND_EVENT_URI = "/find_event";
 
     // This is the Adapter being used to display the list's data
     SimpleCursorAdapter mAdapter;
@@ -47,6 +60,7 @@ public class ListEvent extends ListActivity implements LoaderManager.LoaderCallb
         String longitude = intent.getStringExtra(MainActivity.LONGITUDE_MSG_KEY);
 
         // Connect to API here and find relevant events to populate List View
+        new HttpSender().execute("" + latitude, "" + longitude, ""+1000000000);
 
         // Create a progress bar to display while the list loads
         ProgressBar progressBar = new ProgressBar(this);
@@ -101,6 +115,60 @@ public class ListEvent extends ListActivity implements LoaderManager.LoaderCallb
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         // Do something when a list item is clicked
+    }
+
+    public void findEventsAPI(double latitude, double longitude, double distance)
+    {
+        try {
+
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            HttpPost postRequest = new HttpPost(API_SERVER+":"+PORT+FIND_EVENT_URI);
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("latitude", latitude);
+            jsonObj.put("longitude", longitude);
+            jsonObj.put("distance", distance);
+
+            StringEntity input = new StringEntity(jsonObj.toString(), HTTP.UTF_8);
+            System.out.print(API_SERVER+":"+PORT+FIND_EVENT_URI);
+            System.out.print(jsonObj.toString());
+
+            input.setContentType("application/json");
+            postRequest.setHeader("Accept", "application/json");
+            postRequest.setEntity(input);
+
+            HttpClient client = new DefaultHttpClient();
+            HttpResponse response = client.execute(postRequest);
+            System.out.print(response.getStatusLine().getStatusCode());
+            httpClient.getConnectionManager().shutdown();
+
+        } catch (MalformedURLException e) {
+
+            e.printStackTrace();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private class HttpSender extends AsyncTask<String, Integer, Double> {
+        @Override
+        protected Double doInBackground(String... params) {
+            // TODO Auto-generated method stub
+            findEventsAPI(Double.parseDouble(params[0]),
+                    Double.parseDouble(params[1]), Double.parseDouble(params[2]));
+            return null;
+        }
+
+        protected void onPostExecute(Double result){
+
+        }
+
     }
 
 }
