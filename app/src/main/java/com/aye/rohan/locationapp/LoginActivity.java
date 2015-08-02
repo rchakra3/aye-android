@@ -21,19 +21,23 @@ public class LoginActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
 
+        setContentView(R.layout.activity_login);
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        checkForLogin();
+    }
+
+    private void checkForLogin() {
+
         if(AccessToken.getCurrentAccessToken() != null) {
             accessToken = AccessToken.getCurrentAccessToken().getToken();
             userID = AccessToken.getCurrentAccessToken().getUserId();
             openMainActivity(userID,accessToken);
         }
-
-        setContentView(R.layout.activity_login);
     }
-
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        callbackManager.onActivityResult(requestCode, resultCode, data);
-//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

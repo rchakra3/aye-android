@@ -40,9 +40,7 @@ public class LoginActivityFragment extends Fragment {
         loginButton = (LoginButton) v.findViewById(R.id.login_button);
 
         if(loginButton == null){
-            System.out.println("ERRRORRR");
             Log.e("AYEEEE","ERROR ERROR ERORRR");
-
         }
         loginButton.setFragment(this);
 
@@ -51,7 +49,6 @@ public class LoginActivityFragment extends Fragment {
             public void onSuccess(LoginResult loginResult) {
                 Log.e("aye", "SUCCESS");
                 openMainActivity(loginResult.getAccessToken().getUserId(), loginResult.getAccessToken().getToken());
-
             }
 
             @Override
@@ -64,9 +61,9 @@ public class LoginActivityFragment extends Fragment {
                 Log.e("aye", "Error");
             }
         });
-
         return v;
     }
+
     private void openMainActivity(String userID, String accessToken){
         Intent intent = new Intent(getActivity(), MainActivity.class);
         intent.putExtra("userID",userID);
